@@ -1,0 +1,104 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import TimePicker from './TimePicker';
+
+const PsychologistDashboard = () => {
+  const [bookings, setBookings] = useState([]);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [modifiedTime, setModifiedTime] = useState(null);
+
+  useEffect(() => {
+    // Fetch all bookings for the psychologist (ID: 1 in this example)
+    axios.get('http://localhost:5000/schedule/1')
+      .then(response => setBookings(response.data))
+      .catch(error => console.error(error));
+  }, []);
+
+  const handleApprove = (id) => {
+    axios.put(`http://localhost:5000/approve/${id}`)
+      .then(() => {
+        setBookings(bookings.map(booking => booking.id === id ? { ...booking, status: 'Approved' } : booking));
+      })
+      .catch(error => console.error(error));
+  };
+
+  const handleReject = (id) => {
+    axios.delete(`http://localhost:5000/cancel/${id}`) // Simulating rejection
+      .then(() => {
+        setBookings(bookings.filter(booking => booking.id !== id));
+      })
+      .catch(error => console.error(error));
+  };
+
+  const handleModify = (booking) => {
+    setSelectedBooking(booking);
+    // Set the initial time for the time picker to the booking's current time
+    const initialDateTime = new Date(booking.date_time);
+    initialDateTime.setHours(9, 0, 0, 0); // Set to 9:00 AM
+    setModifiedTime(initialDateTime);
+  };
+
+  const handleModifySubmit = () => {
+      // Ensure modifiedTime is a valid Date object
+      if (!(modifiedTime instanceof Date)) {
+      console.error('Invalid time selected');
+      return; // Prevent submission if time is invalid
+    }
+
+    const newDateTime = modifiedTime; // Use modifiedTime directly
+    axios.put(`http://localhost:5000/modify/${selectedBooking.id}`, { newDateTime }) // Use selectedBooking.id directly
+      .then(() => {
+        setBookings(bookings.map(booking => booking.id === selectedBooking.id ? { ...booking, status: 'Pending', date_time: newDateTime } : booking));
+      })
+      .catch(error => console.error(error));
+    setSelectedBooking(null); // Clear selected booking after submission
+   // setBookings(bookings.map(booking => booking.id === selectedBooking ? { ...booking, status: 'Pending', date_time:newDateTime} : booking));
+
+  };
+
+  const handleDelete = (id) => {
+    axios.delete(`http://localhost:5000/cancel/${id}`)
+      .then(() => {
+        setBookings(bookings.filter(booking => booking.id !== id));
+      })
+      .catch(error => console.error(error));
+  };
+
+  return (
+    <div>
+      <h1>Psychologist Dashboard</h1>
+      <h2>Pending Bookings</h2>
+      <ul>
+        {bookings.filter(booking => booking.status === 'Pending').map(booking => (
+          <li key={booking.id}>
+            {booking.client_name} - {new Date(booking.date_time).toLocaleString()}
+            <button onClick={() => handleApprove(booking.id)}>Approve</button>
+            <button onClick={() => handleReject(booking.id)}>Reject</button>
+          </li>
+        ))}
+      </ul>
+       {/* Conditional rendering for modify modal/form */}
+       {selectedBooking && (
+        <div>
+          <h2>Modify Booking for {selectedBooking.client_name}</h2>
+          <TimePicker selectedDateTime={modifiedTime} onTimeChange={setModifiedTime} />
+          <button onClick={() => setSelectedBooking(null)}>Cancel</button>
+          <button onClick={handleModifySubmit}>Save Changes</button>
+        </div>
+      )}
+
+      <h2>Approved Bookings</h2>
+      <ul>
+        {bookings.filter(booking => booking.status === 'Approved').map(booking => (
+          <li key={booking.id}>
+            {booking.client_name} - {new Date(booking.date_time).toLocaleString()}
+            <button onClick={() => handleModify(booking)}>Modify</button>
+            <button onClick={() => handleDelete(booking.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default PsychologistDashboard;
