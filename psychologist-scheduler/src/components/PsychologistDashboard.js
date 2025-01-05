@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import TimePicker from './TimePicker';
+import { generateAvailability } from './availabilityUtils';
 
 const PsychologistDashboard = () => {
   const [bookings, setBookings] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [modifiedTime, setModifiedTime] = useState(null);
+  const [availability, setAvailability] = useState([]); 
 
   useEffect(() => {
     // Fetch all bookings for the psychologist (ID: 1 in this example)
     axios.get('http://localhost:5000/schedule/1')
-      .then(response => setBookings(response.data))
+      .then(response => { 
+        setBookings(response.data);
+        return response.data;
+      })
+      .then((data) => {setAvailability(generateAvailability(new Date(), data))})
       .catch(error => console.error(error));
   }, []);
 
@@ -46,7 +52,7 @@ const PsychologistDashboard = () => {
     }
 
     const newDateTime = modifiedTime; // Use modifiedTime directly
-    axios.put(`http://localhost:5000/modify/${selectedBooking.id}`, { newDateTime }) // Use selectedBooking.id directly
+    axios.put(`http://localhost:5000/modify/${selectedBooking.id}`, { newDateTime, timezoneOffset: newDateTime.getTimezoneOffset() }) // Use selectedBooking.id directly
       .then(() => {
         setBookings(bookings.map(booking => booking.id === selectedBooking.id ? { ...booking, status: 'Pending', date_time: newDateTime } : booking));
       })
@@ -63,6 +69,7 @@ const PsychologistDashboard = () => {
       })
       .catch(error => console.error(error));
   };
+
 
   return (
     <div>

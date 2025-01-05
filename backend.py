@@ -75,8 +75,11 @@ def modify_booking(booking_id):
         return jsonify({'error': 'Booking not found'}), 404
 
     data = request.json
-    new_date_time = datetime.fromisoformat(data['newDateTime'])
-    booking.date_time = new_date_time
+    local_dt = datetime.strptime(data['newDateTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
+    timezone_offset = data['timezoneOffset']
+    offset = timedelta(minutes=timezone_offset)
+    local_time = local_dt - offset
+    booking.date_time = local_time
     booking.status = 'Pending'  # Reset approval
     db.session.commit()
     return booking_schema.jsonify(booking)
