@@ -16,7 +16,8 @@ const PsychologistDashboard = () => {
         setBookings(response.data);
         return response.data;
       })
-      .then((data) => {setAvailability(generateAvailability(new Date(), data))})
+      //.then((data) => {setAvailability(generateAvailability(new Date(), data))})
+      .then((data) => {setAvailability(generateAvailability(new Date("2024-12-17T09:00:00"), data))})
       .catch(error => console.error(error));
   }, []);
 
