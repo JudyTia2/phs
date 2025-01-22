@@ -1,91 +1,73 @@
-import React, { useState, useEffect } from 'react';
-const TimePicker = ({ selectedDateTime, onTimeChange }) => {
-  const hours = [9, 10, 11, 12, 13, 14, 15, 16, 17,22];
-  const minutes = [0, 15, 30, 45];
+import React, { useState } from 'react';
+import Calendar from 'react-calendar'; // Install with `npm install react-calendar`
+import 'react-calendar/dist/Calendar.css';
+import './TimePicker.css'; // Custom styles for the time grid
+import { generateAvailability } from './availabilityUtils';
+import '../styles.css'; // Import the CSS file
 
-  const [selectedDate, setSelectedDate] = useState(
-   selectedDateTime ? selectedDateTime : new Date()
-  );
-
-  const [selectedHour, setSelectedHour] = useState(selectedDate.getHours());
-  const [selectedMinute, setSelectedMinute] = useState(selectedDate.getMinutes());
-
-  //  useEffect(() => {
-  //   const newDate = new Date(selectedDateTime);
-  //   setSelectedDate(newDate);
-  //   setSelectedHour(newDate.getHours());
-  //   setSelectedMinute(newDate.getMinutes());
-  //   console.log("selectedDateTime "+ selectedDateTime);
-  // }, [selectedDateTime]);
-  
-  const handleDateTimeChange = (newDate, newHour, newMinute) => {
-    const updatedDate = new Date(newDate);
-    updatedDate.setHours(newHour);
-    updatedDate.setMinutes(newMinute);
-    setSelectedDate(updatedDate);
-    setSelectedHour(newHour);
-    setSelectedMinute(newMinute);
-    onTimeChange(updatedDate);
+const TimePicker = ({ onDateTimeChange, bookings }) => {
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedTime, setSelectedTime] = useState(null);
+  const [availability, setAvailability] = useState([]); 
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+    setAvailability(generateAvailability(date, bookings)); // Update availability when date changes
+    setSelectedTime(null); // Reset time when date changes
   };
 
-  const handleDateChange = (event) => {
-    const selectedDateString = event.target.value;
-    const newDate = new Date(`${selectedDateString}T09:00:00`);
-    handleDateTimeChange(newDate, selectedHour, selectedMinute);
+  const handleTimeClick = (time) => {
+    setSelectedTime(time);
+    const dateTime = new Date(selectedDate);
+    dateTime.setHours(time.hour, time.minute);
+    onDateTimeChange(dateTime);
   };
 
-    
-  // };
-  function formatDate(dateString) {
-    // 1. Extract year, month, and day from the input string
-    if(dateString === 'Invalid Date') return "2025-12-01";
-    const parts = dateString.split(/[/ ]/); // Split by "/" or " "
-    const year = parts[0];
-    const month = parts[1].padStart(2, '0'); // Pad month with leading zero if needed
-    const day = parts[2].padStart(2, '0'); 
-  
-    // 2. Construct the formatted date string
-    const formattedDate = `${year}-${month}-${day}`; 
-    return formattedDate;
-  }
+  const renderTimeGrid = () => {
+    const hours = Array.from({ length:  17 - 9 + 1 }, (_, i) => i + 9); // 9 to 17 (5 PM)
+    const minutes = [0, 15, 30, 45];
 
+    return (
+      <div className="time-grid">
+        {hours.map((hour) =>
+          minutes.map((minute) => {
+            const time = { hour, minute };
+            const isAvailable = availability.some(
+              (slot) =>
+                slot.hour === hour && slot.minute === minute && slot.available
+            );
 
-  const handleHourChange = (event) => {
-    const newHour = parseInt(event.target.value, 10);
-    handleDateTimeChange(selectedDate, newHour, selectedMinute);
+            return (
+              <button
+                key={`${hour}:${minute}`}
+                className={`time-slot ${isAvailable ? 'available' : 'unavailable'} ${
+                  selectedTime &&
+                  selectedTime.hour === hour &&
+                  selectedTime.minute === minute
+                    ? 'selected'
+                    : ''
+                }`}
+                disabled={!isAvailable}
+                onClick={() => handleTimeClick(time)}
+              >
+                {`${hour.toString().padStart(2, '0')}:${minute
+                  .toString()
+                  .padStart(2, '0')}`}
+              </button>
+            );
+          })
+        )}
+      </div>
+    );
   };
-
-  const handleMinuteChange = (event) => {
-    const newMinute = parseInt(event.target.value, 10);
-    handleDateTimeChange(selectedDate, selectedHour, newMinute);
-  };
-
-  console.log("rendering TimePicker "+ selectedDate);
 
   return (
-    <div>
-      <label htmlFor="date">Date:</label>
-      <input
-        type="date"
-        id="date"
-        value={formatDate(selectedDate.toLocaleString())}
-        onChange={handleDateChange}
-      />
-      <select
-      value={selectedHour} 
-      onChange={handleHourChange}>
-        {hours.map(hour => (
-          <option key={hour} value={hour}>{hour}:00</option>
-        ))}
-      </select>
-      <select
-      value={selectedMinute} 
-      onChange={handleMinuteChange}>
-        {minutes.map(minute => (
-          <option key={minute} value={minute}>{minute}</option>
-        ))}
-      </select>
+    <div className="time-picker">
+      <h3>Select a Date</h3>
+      <Calendar onChange={handleDateChange} value={selectedDate} />
+      <h3>Select a Time</h3>
+      {renderTimeGrid()}
     </div>
   );
 };
+
 export default TimePicker;

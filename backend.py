@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from datetime import datetime, timedelta
 from flask_cors import CORS
+from sqlalchemy.dialects.postgresql import JSON
+
 
 # Initialize the Flask app
 app = Flask(__name__)
@@ -22,6 +24,7 @@ class Booking(db.Model):
     psychologist_id = db.Column(db.Integer, nullable=False)
     date_time = db.Column(db.DateTime, nullable=False)
     is_recurring = db.Column(db.Boolean, default=False)
+    exceptions = db.Column(JSON, nullable=True)  # Store exceptions as JSON
     status = db.Column(db.String(20), default='Pending')  # Pending, Approved, Rejected
 
     def __repr__(self):
@@ -36,6 +39,30 @@ class BookingSchema(ma.SQLAlchemyAutoSchema):
 booking_schema = BookingSchema()
 bookings_schema = BookingSchema(many=True)
 
+# Add exception to a booking
+@app.route('/add_exception/<int:id>/', methods=['PUT'])
+def add_exception(id):
+    booking = Booking.query.get(id)
+    if not booking:
+        return jsonify({'error': 'Booking not found'}), 404
+    
+    data = request.json
+    exception_date = data['exception_date']
+    if not exception_date:
+        return jsonify({'error': 'Exception date is required'}), 400
+
+    if booking.exceptions is None:
+        booking.exceptions = []
+
+    local_dt = datetime.strptime(data['exception_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
+    timezone_offset = data['timezoneOffset']
+    offset = timedelta(minutes=timezone_offset)
+    local_time = local_dt - offset
+    booking.exceptions.append(local_time.isoformat())
+    db.session.commit()
+
+    return jsonify({'message': 'Exception added successfully'}), 200
+
 # Routes
 @app.route('/book', methods=['POST'])
 def book_time():
@@ -44,7 +71,11 @@ def book_time():
     data = request.json
     client_name = data['client_name']
     psychologist_id = data['psychologist_id']
-    date_time = datetime.fromisoformat(data['date_time'])
+    local_dt = datetime.strptime(data['date_time'], '%Y-%m-%dT%H:%M:%S.%fZ')
+    timezone_offset = data['timezoneOffset']
+    offset = timedelta(minutes=timezone_offset)
+    local_time = local_dt - offset
+    date_time = local_time
     is_recurring = data.get('is_recurring', False)
 
     new_booking = Booking(

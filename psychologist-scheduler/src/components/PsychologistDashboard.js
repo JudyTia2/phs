@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import TimePicker from './TimePicker';
-import { generateAvailability } from './availabilityUtils';
+//import { generateAvailability } from './availabilityUtils';
+import '../styles.css'; // Import the CSS file
 
 const PsychologistDashboard = () => {
   const [bookings, setBookings] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [modifiedTime, setModifiedTime] = useState(null);
-  const [availability, setAvailability] = useState([]); 
+  const [applyToRecurring, setApplyToRecurring] = useState(false);
+  //const [availability, setAvailability] = useState([]); 
 
   useEffect(() => {
     // Fetch all bookings for the psychologist (ID: 1 in this example)
@@ -17,7 +19,7 @@ const PsychologistDashboard = () => {
         return response.data;
       })
       //.then((data) => {setAvailability(generateAvailability(new Date(), data))})
-      .then((data) => {setAvailability(generateAvailability(new Date("2024-12-17T09:00:00"), data))})
+      //.then((data) => {setAvailability(generateAvailability(new Date("2024-12-17T09:00:00"), data))})
       .catch(error => console.error(error));
   }, []);
 
@@ -27,7 +29,8 @@ const PsychologistDashboard = () => {
         setBookings(bookings.map(booking => booking.id === id ? { ...booking, status: 'Approved' } : booking));
       })
       .catch(error => console.error(error));
-  };
+    };
+  
 
   const handleReject = (id) => {
     axios.delete(`http://localhost:5000/cancel/${id}`) // Simulating rejection
@@ -53,6 +56,19 @@ const PsychologistDashboard = () => {
     }
 
     const newDateTime = modifiedTime; // Use modifiedTime directly
+    if (!applyToRecurring) {
+      // Apply changes to the entire recurring series
+      axios.put(`http://localhost:5000/add_exception/${selectedBooking.id}/`, { exception_date:newDateTime, timezoneOffset: newDateTime.getTimezoneOffset() }) // Use selectedBooking.id directly
+        .then(() => {
+                    // Apply changes to a single instance
+          if (!selectedBooking.exceptions) {
+            selectedBooking.exceptions = [];
+          }
+          setBookings(bookings.map(booking => booking.id === selectedBooking.id ? { ...booking, status: 'Pending', exceptions: booking.exceptions.push(newDateTime)} : booking));
+        })
+        .catch(error => console.error(error));
+      setSelectedBooking(null);
+    } else {
     axios.put(`http://localhost:5000/modify/${selectedBooking.id}`, { newDateTime, timezoneOffset: newDateTime.getTimezoneOffset() }) // Use selectedBooking.id directly
       .then(() => {
         setBookings(bookings.map(booking => booking.id === selectedBooking.id ? { ...booking, status: 'Pending', date_time: newDateTime } : booking));
@@ -60,7 +76,7 @@ const PsychologistDashboard = () => {
       .catch(error => console.error(error));
     setSelectedBooking(null); // Clear selected booking after submission
    // setBookings(bookings.map(booking => booking.id === selectedBooking ? { ...booking, status: 'Pending', date_time:newDateTime} : booking));
-
+    }
   };
 
   const handleDelete = (id) => {
@@ -79,17 +95,24 @@ const PsychologistDashboard = () => {
       <ul>
         {bookings.filter(booking => booking.status === 'Pending').map(booking => (
           <li key={booking.id}>
-            {booking.client_name} - {new Date(booking.date_time).toLocaleString()}
+            {booking.client_name} - {new Date(booking.date_time).toLocaleString()} - {booking.is_recurring ? 'Recurring' : 'One-time'}
             <button onClick={() => handleApprove(booking.id)}>Approve</button>
             <button onClick={() => handleReject(booking.id)}>Reject</button>
           </li>
         ))}
       </ul>
-       {/* Conditional rendering for modify modal/form */}
        {selectedBooking && (
         <div>
           <h2>Modify Booking for {selectedBooking.client_name}</h2>
-          <TimePicker selectedDateTime={modifiedTime} onTimeChange={setModifiedTime} />
+          <TimePicker  onDateTimeChange={setModifiedTime} bookings={bookings} />
+          <label>
+            <input
+              type="checkbox"
+              checked={applyToRecurring}
+              onChange={() => setApplyToRecurring(!applyToRecurring)}
+            />
+            Apply to entire recurring series
+          </label>
           <button onClick={() => setSelectedBooking(null)}>Cancel</button>
           <button onClick={handleModifySubmit}>Save Changes</button>
         </div>
@@ -99,9 +122,17 @@ const PsychologistDashboard = () => {
       <ul>
         {bookings.filter(booking => booking.status === 'Approved').map(booking => (
           <li key={booking.id}>
-            {booking.client_name} - {new Date(booking.date_time).toLocaleString()}
+            {booking.client_name} - {new Date(booking.date_time).toLocaleString()} - {booking.is_recurring ? 'Recurring' : 'One-time'}
             <button onClick={() => handleModify(booking)}>Modify</button>
             <button onClick={() => handleDelete(booking.id)}>Delete</button>
+            {booking.exceptions && booking.exceptions.length > 0 && (
+              <ul>
+                <li>Exceptions:</li>
+                {booking.exceptions.map((exception, index) => (
+                  <li key={index}>{new Date(exception).toLocaleString()}</li>
+                ))}
+              </ul>
+            )}
           </li>
         ))}
       </ul>

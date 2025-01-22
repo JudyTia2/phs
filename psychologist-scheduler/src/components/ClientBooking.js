@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import TimePicker from './TimePicker';
 
 const ClientBooking = () => {
+  const [bookings, setBookings] = useState([]);
   const now = new Date();
   const roundedMinutes = Math.round(now.getMinutes() / 15) * 15;
   now.setMinutes(roundedMinutes);
@@ -11,6 +12,17 @@ const ClientBooking = () => {
   const [dateTime, setDateTime] = useState(now);
   const [isRecurring, setIsRecurring] = useState(false);
 
+  useEffect(() => {
+    // Fetch all bookings for the psychologist (ID: 1 in this example)
+    axios.get('http://localhost:5000/schedule/1')
+      .then(response => { 
+        setBookings(response.data);
+        return response.data;
+      })
+      //.then((data) => {setAvailability(generateAvailability(new Date(), data))})
+      //.then((data) => {setAvailability(generateAvailability(new Date("2024-12-17T09:00:00"), data))})
+      .catch(error => console.error(error));
+  }, []);
 
 //   useEffect(() => {
 //     // Set initial time to the nearest 15-minute interval
@@ -22,7 +34,8 @@ const ClientBooking = () => {
 //     console.log("effect time "+ now); 
 //   }, [clientName]);
 // }
-const emptyFunction = () => {}; 
+
+
   const handleSubmit = (e) => {
     console.log(dateTime); 
     e.preventDefault();
@@ -32,6 +45,7 @@ const emptyFunction = () => {};
       psychologist_id: 1,
       date_time: dateTime,
       is_recurring: isRecurring,
+      timezoneOffset: dateTime.getTimezoneOffset()
     })
       .then(() => alert('Booking request submitted!'))
       .catch(error => console.error(error));
@@ -51,7 +65,7 @@ const emptyFunction = () => {};
         </div>
         <div>
           <label>Date and Time:</label>
-          <TimePicker selectedDateTime={dateTime} onTimeChange={setDateTime} />
+          <TimePicker onDateTimeChange={setDateTime} bookings={bookings} />
         </div>
         <div>
           <label>Recurring Weekly:</label>
