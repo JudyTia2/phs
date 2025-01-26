@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import TimePicker from './TimePicker';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ClientBooking = () => {
   const [bookings, setBookings] = useState([]);
@@ -47,12 +49,18 @@ const ClientBooking = () => {
       is_recurring: isRecurring,
       timezoneOffset: dateTime.getTimezoneOffset()
     })
-      .then(() => alert('Booking request submitted!'))
+    .then(() => {
+      toast.success('Booking request submitted!', {
+        position: "top-center",
+        autoClose: 3000, // Close after 3 seconds
+      });
+    })
       .catch(error => console.error(error));
   };
   return (
     <div>
       <h1>Book a Session</h1>
+      <TimePicker onDateTimeChange={setDateTime} bookings={bookings} />
       <form onSubmit={handleSubmit}>
         <div>
           <label>Client Name:</label>
@@ -63,10 +71,9 @@ const ClientBooking = () => {
             required
           />
         </div>
-        <div>
-          <label>Date and Time:</label>
-          <TimePicker onDateTimeChange={setDateTime} bookings={bookings} />
-        </div>
+        
+
+        
         <div>
           <label>Recurring Weekly:</label>
           <input
@@ -77,6 +84,7 @@ const ClientBooking = () => {
         </div>
         <button type="submit">Request Booking</button>
       </form>
+      <ToastContainer />
     </div>
   );
 };

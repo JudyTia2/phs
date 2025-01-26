@@ -8,6 +8,9 @@ body {
     margin: 0;
     padding: 0;
 }
+label {
+    text-align: center;
+}
 
 h1, h2 {
     color: #ecf0f1;
@@ -37,4 +40,9 @@ button:hover {
 
 .time-picker {
     font-family: 'Poppins', Arial, sans-serif;
+}
+/* Calendar Styles */
+.react-calendar__month-view__days__day {
+    flex-basis: 13.28%; /* Ensure each day takes up 1/7th of the row */
+    max-width: 13.28%;
 }

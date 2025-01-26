@@ -6,6 +6,13 @@
   background-color: #34495e;
   border-radius: 8px;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+  max-width: 600px;
+  margin: 0 auto;
+}
+.centerbutton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .time-picker h3 {
@@ -62,13 +69,14 @@ form {
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
-  max-width: 400px;
+  max-width: 600px;
   margin: 0 auto;
 }
 
 form div {
   margin-bottom: 15px;
   width: 100%;
+  text-align: center
 }
 
 label {
@@ -88,3 +96,31 @@ input[type="text"], input[type="checkbox"] {
 input[type="checkbox"] {
   margin-right: 10px;
 }
+
+/* Center the react-calendar navigation */
+.react-calendar__navigation {
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+}
+
+.react-calendar__tile--active {
+  background-color: #74ce0e;
+  color: #fff;
+}
+
+.react-calendar__tile--now {
+  background-color: #66882b;
+  color: #fff;
+}
+
+/* .react-calendar__tile--range {
+  background-color: #777;
+  color: #fff;
+}
+
+.react-calendar__tile--rangeStart,
+.react-calendar__tile--rangeEnd {
+  background-color: #888;
+  color: #fff;
+} */

@@ -37,7 +37,7 @@ export const generateAvailability = (date, bookings) => {
             getWeekNumber(exceptionDate) === getWeekNumber(nextBookingDate)
           );
         });
-        if (nextBookingDate <= end && !hasException) {
+        if (!hasException) {
           allBookings.push(new Date(nextBookingDate));
         }
         nextBookingDate.setDate(nextBookingDate.getDate() + 7); // Weekly recurrence

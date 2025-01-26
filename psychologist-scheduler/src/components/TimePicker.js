@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import Calendar from 'react-calendar'; // Install with `npm install react-calendar`
-import 'react-calendar/dist/Calendar.css';
+//import 'react-calendar/dist/Calendar.css';
 import './TimePicker.css'; // Custom styles for the time grid
+import 'react-datepicker/dist/react-datepicker.css';
 import { generateAvailability } from './availabilityUtils';
-import '../styles.css'; // Import the CSS file
+//import '../styles.css'; // Import the CSS file
 
 const TimePicker = ({ onDateTimeChange, bookings }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());

@@ -113,8 +113,10 @@ const PsychologistDashboard = () => {
             />
             Apply to entire recurring series
           </label>
+          <div class ='centerbutton'>
           <button onClick={() => setSelectedBooking(null)}>Cancel</button>
           <button onClick={handleModifySubmit}>Save Changes</button>
+          </div>
         </div>
       )}
 
