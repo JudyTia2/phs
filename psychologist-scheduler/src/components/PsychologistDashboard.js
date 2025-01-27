@@ -13,7 +13,8 @@ const PsychologistDashboard = () => {
 
   useEffect(() => {
     // Fetch all bookings for the psychologist (ID: 1 in this example)
-    axios.get('http://localhost:5000/schedule/1')
+    //axios.get('http://localhost:5000/schedule/1')
+    axios.get('https://backend-9z9u.onrender.com/schedule/1')
       .then(response => { 
         setBookings(response.data);
         return response.data;
@@ -24,7 +25,7 @@ const PsychologistDashboard = () => {
   }, []);
 
   const handleApprove = (id) => {
-    axios.put(`http://localhost:5000/approve/${id}`)
+    axios.put(`https://backend-9z9u.onrender.com/approve/${id}`)
       .then(() => {
         setBookings(bookings.map(booking => booking.id === id ? { ...booking, status: 'Approved' } : booking));
       })
@@ -33,7 +34,7 @@ const PsychologistDashboard = () => {
   
 
   const handleReject = (id) => {
-    axios.delete(`http://localhost:5000/cancel/${id}`) // Simulating rejection
+    axios.delete(`https://backend-9z9u.onrender.com/cancel/${id}`) // Simulating rejection
       .then(() => {
         setBookings(bookings.filter(booking => booking.id !== id));
       })
@@ -58,7 +59,7 @@ const PsychologistDashboard = () => {
     const newDateTime = modifiedTime; // Use modifiedTime directly
     if (!applyToRecurring) {
       // Apply changes to the entire recurring series
-      axios.put(`http://localhost:5000/add_exception/${selectedBooking.id}/`, { exception_date:newDateTime, timezoneOffset: newDateTime.getTimezoneOffset() }) // Use selectedBooking.id directly
+      axios.put(`https://backend-9z9u.onrender.com/add_exception/${selectedBooking.id}/`, { exception_date:newDateTime, timezoneOffset: newDateTime.getTimezoneOffset() }) // Use selectedBooking.id directly
         .then(() => {
                     // Apply changes to a single instance
           if (!selectedBooking.exceptions) {
@@ -69,7 +70,7 @@ const PsychologistDashboard = () => {
         .catch(error => console.error(error));
       setSelectedBooking(null);
     } else {
-    axios.put(`http://localhost:5000/modify/${selectedBooking.id}`, { newDateTime, timezoneOffset: newDateTime.getTimezoneOffset() }) // Use selectedBooking.id directly
+    axios.put(`https://backend-9z9u.onrender.com/modify/${selectedBooking.id}`, { newDateTime, timezoneOffset: newDateTime.getTimezoneOffset() }) // Use selectedBooking.id directly
       .then(() => {
         setBookings(bookings.map(booking => booking.id === selectedBooking.id ? { ...booking, status: 'Pending', date_time: newDateTime } : booking));
       })
@@ -80,7 +81,7 @@ const PsychologistDashboard = () => {
   };
 
   const handleDelete = (id) => {
-    axios.delete(`http://localhost:5000/cancel/${id}`)
+    axios.delete(`https://backend-9z9u.onrender.com/cancel/${id}`)
       .then(() => {
         setBookings(bookings.filter(booking => booking.id !== id));
       })
