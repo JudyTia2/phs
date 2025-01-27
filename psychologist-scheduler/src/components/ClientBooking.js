@@ -16,7 +16,7 @@ const ClientBooking = () => {
 
   useEffect(() => {
     // Fetch all bookings for the psychologist (ID: 1 in this example)
-    axios.get('http://localhost:5000/schedule/1')
+    axios.get('https://backend-9z9u.onrender.com/schedule/1')
       .then(response => { 
         setBookings(response.data);
         return response.data;
@@ -42,7 +42,7 @@ const ClientBooking = () => {
     console.log(dateTime); 
     e.preventDefault();
 
-    axios.post('http://localhost:5000/book', {
+    axios.post('https://backend-9z9u.onrender.com/book', {
       client_name: clientName,
       psychologist_id: 1,
       date_time: dateTime,
