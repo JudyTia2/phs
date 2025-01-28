@@ -139,6 +139,9 @@ const PsychologistDashboard = () => {
           </li>
         ))}
       </ul>
+      <footer>
+      <p><a href='https://www.linkedin.com/in/duohui-tian-3821a0151/'>2025 @Copyright: Duohui Tian</a></p>
+      </footer>
     </div>
   );
 };

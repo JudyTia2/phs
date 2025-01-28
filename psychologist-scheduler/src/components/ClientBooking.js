@@ -3,6 +3,7 @@ import axios from 'axios';
 import TimePicker from './TimePicker';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import '../styles.css'; // Import the CSS file
 
 const ClientBooking = () => {
   const [bookings, setBookings] = useState([]);
@@ -85,6 +86,9 @@ const ClientBooking = () => {
         <button type="submit">Request Booking</button>
       </form>
       <ToastContainer />
+      <footer>
+      <p><a href='https://www.linkedin.com/in/duohui-tian-3821a0151/'>2025 @Copyright: Duohui Tian</a></p>
+      </footer>
     </div>
   );
 };
