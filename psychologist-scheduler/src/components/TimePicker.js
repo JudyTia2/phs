@@ -59,11 +59,16 @@ const TimePicker = ({ onDateTimeChange, bookings }) => {
       </div>
     );
   };
-
+  const tileClassName = ({ date, view }) => {
+    if (view === 'month' && date <= new Date()) {
+      return 'past-date';
+    }
+    return null;
+  };
   return (
     <div className="time-picker">
       <h3>Select a Date</h3>
-      <Calendar onChange={handleDateChange} value={selectedDate} />
+      <Calendar onChange={handleDateChange} value={selectedDate}  minDate={new Date()}  tileClassName={tileClassName}/>
       <h3>Select a Time</h3>
       {renderTimeGrid()}
     </div>

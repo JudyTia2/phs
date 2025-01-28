@@ -16,6 +16,13 @@
   align-items: center;
 }
 
+.past-date {
+  background-color: #e74c3c;
+  color: #fff;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .time-picker h3 {
   color: #ecf0f1;
   margin-bottom: 15px;
