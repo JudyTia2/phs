@@ -42,6 +42,9 @@ export const generateAvailability = (date, bookings) => {
         }
         nextBookingDate.setDate(nextBookingDate.getDate() + 7); // Weekly recurrence
       }
+    } else {
+      // Add single booking
+      allBookings.push(bookingDate);
     }
     // Add exceptions
     if (booking.exceptions) {

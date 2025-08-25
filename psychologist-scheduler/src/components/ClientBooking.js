@@ -50,11 +50,24 @@ const ClientBooking = () => {
       is_recurring: isRecurring,
       timezoneOffset: dateTime.getTimezoneOffset()
     })
-    .then(() => {
+    .then(response => {
       toast.success('Booking request submitted!', {
         position: "top-center",
         autoClose: 3000, // Close after 3 seconds
       });
+      // Add the new booking to the list
+        setBookings([...bookings, response.data]);
+        
+        // --- SOLUTION: Reset the form fields after a successful submit ---
+        setClientName(''); // Clear the client name field
+        setIsRecurring(false); // Reset the checkbox
+        
+        // Reset the dateTime state to a new initial value
+        const now = new Date();
+        const roundedMinutes = Math.round(now.getMinutes() / 15) * 15;
+        now.setMinutes(roundedMinutes);
+        now.setSeconds(0);
+        setDateTime(now);
     })
       .catch(error => console.error(error));
   };

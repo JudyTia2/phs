@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import Calendar from 'react-calendar'; // Install with `npm install react-calendar`
 //import 'react-calendar/dist/Calendar.css';
 import './TimePicker.css'; // Custom styles for the time grid
@@ -8,7 +8,11 @@ import { generateAvailability } from './availabilityUtils';
 const TimePicker = ({ onDateTimeChange, bookings }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState(null);
-  const [availability, setAvailability] = useState([]); 
+  const [availability, setAvailability] = useState([]);
+  useEffect(() => {
+    // 当 bookings 或 selectedDate 变化时，重新计算 availability
+    setAvailability(generateAvailability(selectedDate, bookings));
+  }, [bookings, selectedDate]);  
   const handleDateChange = (date) => {
     setSelectedDate(date);
     setAvailability(generateAvailability(date, bookings)); // Update availability when date changes
