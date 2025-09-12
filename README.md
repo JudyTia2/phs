@@ -26,4 +26,4 @@ This project demonstrates my experience in:
 
 ---
 
-📫 Contact: [your email here]
+📫 Contact: [jkl12zys@gmail.com]
