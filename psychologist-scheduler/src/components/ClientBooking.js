@@ -14,10 +14,14 @@ const ClientBooking = () => {
   const [clientName, setClientName] = useState('');
   const [dateTime, setDateTime] = useState(now);
   const [isRecurring, setIsRecurring] = useState(false);
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
+
 
   useEffect(() => {
     // Fetch all bookings for the psychologist (ID: 1 in this example)
-    axios.get('https://backend-9z9u.onrender.com/schedule/1')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    axios.get(`${API_BASE_URL}/schedule/1`)
       .then(response => { 
         setBookings(response.data);
         return response.data;
@@ -43,7 +47,7 @@ const ClientBooking = () => {
     console.log(dateTime); 
     e.preventDefault();
 
-    axios.post('https://backend-9z9u.onrender.com/book', {
+    axios.post(`${API_BASE_URL}/book`, {
       client_name: clientName,
       psychologist_id: 1,
       date_time: dateTime,
