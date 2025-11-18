@@ -61,7 +61,9 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         # compute latency in ms
         latency_ms = (time.perf_counter() - start_time) * 1000
-
+        response.headers["Access-Control-Allow-Origin"] = "https://phs-70gu.onrender.com"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "*"
         log_data = {
             "request_id": request_id,
             "method": request.method,
