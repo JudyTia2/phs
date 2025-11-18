@@ -1,32 +1,28 @@
-# Use an official Python runtime as a parent image
 FROM python:3.9-slim
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Set the working directory in the container
 WORKDIR /app
 
-# Install system dependencies that might be needed by your Python packages
-# For example, for psycopg2 you might need: RUN apt-get update && apt-get install -y postgresql-client
-
-# Copy the requirements file and install dependencies
+# 1) Install dependencies as root
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code
+# 2) Copy your code
 COPY . .
 
-# Create a non-root user to run the application
-RUN addgroup --system app && adduser --system --group app
+# 3) Copy start.sh and make it executable AS ROOT
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+# 4) Create non-root user and give ownership of start.sh
+RUN addgroup --system app && adduser --system --group app && chown app:app /start.sh
+
+# 5) Drop privileges
 USER app
 
 EXPOSE 8000
 
-# Copy start script and make it executable
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
-
-# Use the start script as container entrypoint
+# 6) Use the start script as entrypoint
 CMD ["/start.sh"]
