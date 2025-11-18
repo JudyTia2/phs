@@ -1,0 +1,50 @@
+# docker-compose.yml
+services:
+  frontend:
+    build:
+      context: ./psychologist-scheduler
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount the source code
+      - ./psychologist-scheduler:/app
+      # Use a volume for node_modules to avoid overwriting it with a local version
+      - /app/node_modules
+    environment:
+      # This ensures the React development server is accessible from outside the container.
+      - HOST=0.0.0.0
+    env_file: .env.frontend
+    depends_on: [api]
+  api:
+    build:
+      context: .
+      dockerfile: ./docker/api/Dockerfile
+    env_file: .env
+    ports:
+      - "5000:5000" # Application port
+      - "5678:5678" # Debugger port
+    depends_on: [redis]
+    # For development, you can mount the code. For production, the code should be in the image.
+    volumes: [".:/app"]
+    # Run the FastAPI app with uvicorn, with --reload for development.
+    # Start the debug server and wait for a client to attach before starting the app
+    command: sh -c "python -m debugpy --listen 0.0.0.0:5678 --wait-for-client -m uvicorn main:app --host 0.0.0.0 --port 5000 --reload"
+    # command: sh -c "python -m debugpy --listen 0.0.0.0:5678 -m uvicorn main:app --host 0.0.0.0 --port 5000 --reload"
+  redis:
+    image: redis:7-alpine
+    ports: ["6380:6379"] # Changed host port to 6380 to avoid conflict
+    volumes:
+      - redis_data:/data
+  worker:
+    build:
+      context: .
+      dockerfile: ./docker/api/Dockerfile
+    env_file: .env
+    depends_on: [redis]
+    # For development, you can mount the code. For production, the code should be in the image.
+    volumes: [".:/app"]
+    command: sh -c "watchfiles 'celery -A tasks.worker worker -l info -Q reports,default'"
+
+volumes:
+  redis_data:

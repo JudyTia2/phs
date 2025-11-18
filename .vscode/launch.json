@@ -1,54 +1,20 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Attach to API",
+      "type": "python",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 5678
+      },
+      "pathMappings": [
         {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch Chrome",
-            "url": "http://192.168.0.156:3000", // Replace with your actual URL
-            "webRoot": "${workspaceFolder}", // Optional: Specify the root directory of your web app
-            "userDataDir": "${workspaceFolder}/.chrome", // Optional: Specify a custom user data directory
-            "sourceMapPathOverrides": {
-                "webpack:///./src/*": "${workspaceFolder}/src/*"
-            } // Optional: Map source maps to your local source files
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch and Debug Program", // Start directly
-            "program": "C:/Users/Administrator/Documents/test/phs/psychologist-scheduler/src/app.js", // Entry point of your app
-            "outFiles": ["${workspaceFolder}/dist/**/*.js"], // Used for transpiled code
-            "skipFiles": ["<node_internals>/**"],
-            "console": "integratedTerminal"
-        },      
-          {
-            "type": "node",
-            "request": "attach",
-            "name": "Attach to Process",
-            "processId": "${command:PickProcess}",
-            "skipFiles": ["<node_internals>/**"]
-          },
-        
-        {
-            "name": "Python Debugger: Flask",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "flask",
-            "env": {
-                "FLASK_APP": "backend.py",
-                "FLASK_DEBUG": "1"
-            },
-            "args": [
-                "run",
-                "--no-debugger",
-                "--no-reload"
-            ],
-            "jinja": true,
-            "autoStartBrowser": false
+          "localRoot": "${workspaceFolder}",
+          "remoteRoot": "/app"
         }
-    ]
+      ]
+    }
+  ]
 }

@@ -3,6 +3,8 @@ import axios from 'axios';
 import TimePicker from './TimePicker';
 //import { generateAvailability } from './availabilityUtils';
 import '../styles.css'; // Import the CSS file
+import ReportButton from "./ReportButton";
+
 
 const PsychologistDashboard = () => {
   const [bookings, setBookings] = useState([]);
@@ -10,11 +12,14 @@ const PsychologistDashboard = () => {
   const [modifiedTime, setModifiedTime] = useState(null);
   const [applyToRecurring, setApplyToRecurring] = useState(false);
   //const [availability, setAvailability] = useState([]); 
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+  
 
   useEffect(() => {
     // Fetch all bookings for the psychologist (ID: 1 in this example)
-    //axios.get('http://localhost:5000/schedule/1')
-    axios.get('https://backend-9z9u.onrender.com/schedule/1')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    axios.get(`${API_BASE_URL}/schedule/1`)
+    //axios.get('https://backend-9z9u.onrender.com/schedule/1')
       .then(response => { 
         setBookings(response.data);
         return response.data;
@@ -25,7 +30,7 @@ const PsychologistDashboard = () => {
   }, []);
 
   const handleApprove = (id) => {
-    axios.put(`https://backend-9z9u.onrender.com/approve/${id}`)
+    axios.put(`${API_BASE_URL}/approve/${id}`)
       .then(() => {
         setBookings(bookings.map(booking => booking.id === id ? { ...booking, status: 'Approved' } : booking));
       })
@@ -34,7 +39,7 @@ const PsychologistDashboard = () => {
   
 
   const handleReject = (id) => {
-    axios.delete(`https://backend-9z9u.onrender.com/cancel/${id}`) // Simulating rejection
+    axios.delete(`${API_BASE_URL}/cancel/${id}`) // Simulating rejection
       .then(() => {
         setBookings(bookings.filter(booking => booking.id !== id));
       })
@@ -59,7 +64,7 @@ const PsychologistDashboard = () => {
     const newDateTime = modifiedTime; // Use modifiedTime directly
     if (!applyToRecurring) {
       // Apply changes to the entire recurring series
-      axios.put(`https://backend-9z9u.onrender.com/add_exception/${selectedBooking.id}/`, { exception_date:newDateTime, timezoneOffset: newDateTime.getTimezoneOffset() }) // Use selectedBooking.id directly
+      axios.put(`${API_BASE_URL}/add_exception/${selectedBooking.id}/`, { exception_date:newDateTime, timezoneOffset: newDateTime.getTimezoneOffset() }) // Use selectedBooking.id directly
         .then(() => {
                     // Apply changes to a single instance
           if (!selectedBooking.exceptions) {
@@ -70,7 +75,7 @@ const PsychologistDashboard = () => {
         .catch(error => console.error(error));
       setSelectedBooking(null);
     } else {
-    axios.put(`https://backend-9z9u.onrender.com/modify/${selectedBooking.id}`, { newDateTime, timezoneOffset: newDateTime.getTimezoneOffset() }) // Use selectedBooking.id directly
+    axios.put(`${API_BASE_URL}/modify/${selectedBooking.id}`, { newDateTime, timezoneOffset: newDateTime.getTimezoneOffset() }) // Use selectedBooking.id directly
       .then(() => {
         setBookings(bookings.map(booking => booking.id === selectedBooking.id ? { ...booking, status: 'Pending', date_time: newDateTime } : booking));
       })
@@ -81,7 +86,7 @@ const PsychologistDashboard = () => {
   };
 
   const handleDelete = (id) => {
-    axios.delete(`https://backend-9z9u.onrender.com/cancel/${id}`)
+    axios.delete(`${API_BASE_URL}/cancel/${id}`)
       .then(() => {
         setBookings(bookings.filter(booking => booking.id !== id));
       })
@@ -139,6 +144,10 @@ const PsychologistDashboard = () => {
           </li>
         ))}
       </ul>
+      <div style={{ marginTop: "20px" }}>
+        <h3>Monthly Report</h3>
+        <ReportButton month="2025-11" apiBase={API_BASE_URL} />
+      </div>
       <footer>
       <p><a href='https://www.linkedin.com/in/duohui-tian-3821a0151/'>2025 @Copyright: Duohui Tian</a></p>
       </footer>
