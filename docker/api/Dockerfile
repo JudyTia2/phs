@@ -22,8 +22,11 @@ COPY . .
 RUN addgroup --system app && adduser --system --group app
 USER app
 
-# Expose the port uvicorn will listen on
 EXPOSE 8000
 
-# Start FastAPI with uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Copy start script and make it executable
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+# Use the start script as container entrypoint
+CMD ["/start.sh"]
