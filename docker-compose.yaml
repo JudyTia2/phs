@@ -30,6 +30,7 @@ services:
     # Run the FastAPI app with uvicorn, with --reload for development.
     # Start the debug server and wait for a client to attach before starting the app
     command: sh -c "python -m debugpy --listen 0.0.0.0:5678 --wait-for-client -m uvicorn main:app --host 0.0.0.0 --port 5000 --reload"
+    # command: sh -c "python -m debugpy --listen 0.0.0.0:5678 -m uvicorn main:app --host 0.0.0.0 --port 5000 --reload"
   redis:
     image: redis:7-alpine
     ports: ["6380:6379"] # Changed host port to 6380 to avoid conflict
@@ -43,7 +44,7 @@ services:
     depends_on: [redis]
     # For development, you can mount the code. For production, the code should be in the image.
     volumes: [".:/app"]
-    command: sh -c "celery -A tasks.worker worker -l info -Q reports,default --reload"
+    command: sh -c "watchfiles 'celery -A tasks.worker worker -l info -Q reports,default'"
 
 volumes:
   redis_data:

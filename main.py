@@ -12,6 +12,35 @@ from sqlalchemy.dialects.postgresql import JSON
 from database import Base, engine, get_db
 from tasks.reporting import generate_report
 
+import logging
+import json
+import uuid
+import time
+from starlette.middleware.base import BaseHTTPMiddleware
+
+
+
+# JSON logger configuration
+logger = logging.getLogger("psychologist health")
+logger.setLevel(logging.INFO)
+
+handler = logging.StreamHandler()
+handler.setLevel(logging.INFO)
+
+class JsonRequestFormatter(logging.Formatter):
+    def format(self, record):
+        msg = record.msg
+        if not isinstance(msg, dict):
+            msg = {"message": str(msg)}
+        msg.setdefault("level", record.levelname)
+        msg.setdefault("logger", record.name)
+        return json.dumps(msg, ensure_ascii=False)
+
+handler.setFormatter(JsonRequestFormatter())
+logger.handlers.clear()
+logger.addHandler(handler)
+
+
 # Initialize FastAPI app
 app = FastAPI()
 
@@ -22,6 +51,30 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+class RequestLoggingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        request_id = str(uuid.uuid4())
+        # store on request.state so handlers can use it later if needed
+        request.state.request_id = request_id
+        start_time = time.perf_counter()
+        response = await call_next(request)
+        # compute latency in ms
+        latency_ms = (time.perf_counter() - start_time) * 1000
+
+        log_data = {
+            "request_id": request_id,
+            "method": request.method,
+            "path": request.url.path,
+            "status": response.status_code,
+            "client": request.client.host if request.client else None,
+            "latency_ms": round(latency_ms, 2),  # round to 2 decimals
+            # you can add more fields later, e.g. "user_id"
+        }
+        logger.info(log_data)
+        return response
+
+app.add_middleware(RequestLoggingMiddleware)
 
 # Redis client
 r = redis.from_url(os.getenv("REDIS_URL", "redis://redis:6379/0"))
@@ -98,6 +151,9 @@ async def create_report(request: Request, idempotency_key: Optional[str] = Heade
     r.setex(f"task:{idempotency_key}", 3600, async_res.id)
     return {"status": "accepted", "poll": f"/jobs/{idempotency_key}"}
 
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
 
 @app.get("/jobs/{key}")
 def poll_job(key: str):

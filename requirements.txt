@@ -9,3 +9,4 @@ python-dotenv==1.0.1
 redis==5.0.4
 pydantic-settings==2.3.0
 debugpy
+watchfiles
