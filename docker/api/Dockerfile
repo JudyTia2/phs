@@ -22,4 +22,8 @@ COPY . .
 RUN addgroup --system app && adduser --system --group app
 USER app
 
-# The command to run the application will be specified in the docker-compose.yml
+# Expose the port uvicorn will listen on
+EXPOSE 8000
+
+# Start FastAPI with uvicorn
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
