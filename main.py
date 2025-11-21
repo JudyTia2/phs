@@ -64,6 +64,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         response.headers["Access-Control-Allow-Origin"] = "https://phs-70gu.onrender.com"
         response.headers["Access-Control-Allow-Headers"] = "*"
         response.headers["Access-Control-Allow-Methods"] = "*"
+        response.headers["X-Request-ID"] = request_id
         log_data = {
             "request_id": request_id,
             "method": request.method,
@@ -74,6 +75,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             # you can add more fields later, e.g. "user_id"
         }
         logger.info(log_data)
+        
         return response
 
 app.add_middleware(RequestLoggingMiddleware)
