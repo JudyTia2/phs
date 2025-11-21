@@ -136,6 +136,14 @@ class BookingSchema(BookingBase):
     psychologist_id: int
     exceptions: Optional[list] = None
 
+@app.get("/debug-file-check")
+def debug_file_check():
+    return {
+        "file_loaded_by_render": "main.py",
+        "has_request_id_code": hasattr(RequestLoggingMiddleware, "dispatch"),
+        "signature": "v3-hello-test"
+    }
+
 
 @app.post("/reports", status_code=202)
 async def create_report(request: Request, idempotency_key: Optional[str] = Header(None)):
