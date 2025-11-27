@@ -3,10 +3,15 @@ import os
 from celery import Celery
 import ssl
 
+from utils.logging_config import setup_logging
+setup_logging()
+
 redis_url = os.getenv("REDIS_URL", "redis://redis:6379/0")
 celery_app = Celery("govhealth", broker=redis_url, backend=redis_url)
+
 celery_app.conf.task_default_queue = "default"
 celery_app.conf.task_routes = {"tasks.reporting.*": {"queue": "reports"}}
+celery_app.conf.worker_hijack_root_logger = False 
 if redis_url and redis_url.startswith("rediss://"):
     celery_app.conf.broker_use_ssl = {
         "ssl_cert_reqs": ssl.CERT_NONE,  # Demo 用，关闭证书校验
@@ -14,3 +19,5 @@ if redis_url and redis_url.startswith("rediss://"):
     celery_app.conf.redis_backend_use_ssl = {
         "ssl_cert_reqs": ssl.CERT_NONE,  # 同上
     }
+
+from . import reporting  # ensure tasks are registered
