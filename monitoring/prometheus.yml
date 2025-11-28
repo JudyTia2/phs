@@ -1,0 +1,18 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  # 1) Scrape your FastAPI backend
+  - job_name: "fastapi-backend"
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          # Use docker-compose service name, NOT localhost
+          - "api:5000"
+
+  # 2) Placeholder for Celery / Redis exporters (add later)
+  # - job_name: "celery-worker"
+  #   static_configs:
+  #     - targets:
+  #         - "celery-exporter:9808"

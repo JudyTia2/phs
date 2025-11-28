@@ -10,3 +10,4 @@ redis==5.0.4
 pydantic-settings==2.3.0
 debugpy
 watchfiles
+prometheus-fastapi-instrumentator==6.1.0

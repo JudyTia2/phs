@@ -45,6 +45,40 @@ services:
     # For development, you can mount the code. For production, the code should be in the image.
     volumes: [".:/app"]
     command: sh -c "watchfiles 'celery -A tasks.worker worker -l info -Q reports,default'"
+  prometheus:
+      image: prom/prometheus:v2.54.0
+      restart: unless-stopped
+      container_name: prometheus
+      volumes:
+        # Load your local config
+        - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+        # Persistent data storage
+        - prom_data:/prometheus
+      command:
+        - "--config.file=/etc/prometheus/prometheus.yml"
+      ports:
+        - "9090:9090"
+      depends_on:
+        - api
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    restart: unless-stopped
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      # Persistent dashboard storage
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
 
 volumes:
   redis_data:
+  prom_data:
+  grafana_data:
+
+  

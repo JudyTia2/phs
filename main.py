@@ -19,6 +19,7 @@ import time
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import JSONResponse
 import traceback
+from prometheus_fastapi_instrumentator import Instrumentator
 
 
 
@@ -67,6 +68,9 @@ logger.addHandler(handler)
 
 # Initialize FastAPI app
 app = FastAPI()
+
+# This automatically adds /metrics
+Instrumentator().instrument(app).expose(app)
 
 # Explicit list of allowed frontend origins
 origins = [
