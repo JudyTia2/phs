@@ -20,6 +20,19 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import JSONResponse
 import traceback
 from prometheus_fastapi_instrumentator import Instrumentator
+from prometheus_client import Counter, Histogram
+
+REQUEST_COUNT = Counter(
+    "http_requests_total",
+    "Total number of HTTP requests",
+    ["method", "endpoint"]
+)
+
+REQUEST_LATENCY = Histogram(
+    "http_request_latency_seconds",
+    "HTTP request latency",
+    ["method", "endpoint"]
+)
 
 
 
@@ -186,6 +199,18 @@ async def http_exception_handler(request: Request, exc: HTTPException):
             "request_id": request_id,
         },
     )
+
+@app.middleware("http")
+async def prometheus_middleware(request, call_next):
+    method = request.method
+    endpoint = request.url.path
+    
+    REQUEST_COUNT.labels(method=method, endpoint=endpoint).inc()
+
+    with REQUEST_LATENCY.labels(method=method, endpoint=endpoint).time():
+        response = await call_next(request)
+
+    return response
 
 
 # Redis client
